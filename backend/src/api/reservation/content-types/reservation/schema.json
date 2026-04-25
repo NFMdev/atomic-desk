@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reservations",
+  "info": {
+    "singularName": "reservation",
+    "pluralName": "reservations",
+    "displayName": "Reservation"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "idempotencyKey": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "startTime": {
+      "type": "datetime",
+      "required": true
+    },
+    "endTime": {
+      "type": "datetime",
+      "required": true
+    },
+    "reservationStatus": {
+      "type": "enumeration",
+      "required": true,
+      "enum": [
+        "PENDING_LOCK",
+        "CONFIRMED",
+        "RELEASED"
+      ]
+    },
+    "lockedUntil": {
+      "type": "datetime"
+    },
+    "space": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::space.space",
+      "inversedBy": "reservations"
+    }
+  }
+}
