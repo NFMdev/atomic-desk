@@ -1,4 +1,5 @@
 import { factories } from '@strapi/strapi';
+import crypto from 'crypto';
 
 export default factories.createCoreService('api::reservation.reservation', ({ strapi }) => ({
     async createLockTransaction(spaceId: number, startTime: string, endTime: string, idempotencyKey: string) {
@@ -17,12 +18,13 @@ export default factories.createCoreService('api::reservation.reservation', ({ st
 
             // Conflict Check
             const overlapping = await trx('reservations')
-                .where({ space_id: spaceId })
-                .whereIn('status', ['CONFIRMED', 'PENDING_LOCK'])
+                .join('reservations_space_lnk', 'reservations.id', 'reservations_space_lnk.reservation_id')
+                .where('reservations_space_lnk.space_id', spaceId)
+                .whereIn('reservations.reservation_status', ['CONFIRMED', 'PENDING_LOCK'])
                 .andWhere((builder) => {
                     builder.
-                        whereBetween('start_time', [startTime, endTime])
-                        .orWhereBetween('end_time', [startTime, endTime])
+                        whereBetween('reservations.start_time', [startTime, endTime])
+                        .orWhereBetween('reservations.end_time', [startTime, endTime])
                 })
                 .first();
 
@@ -32,15 +34,20 @@ export default factories.createCoreService('api::reservation.reservation', ({ st
             const lockedUntil = new Date(Date.now() + 5 * 60 * 1000);
 
             const [newReservation] = await trx('reservations').insert({
-                space_id: spaceId,
+                document_id: crypto.randomUUID(),
                 start_time: startTime,
                 end_time: endTime,
-                status: 'LOCKED',
+                reservation_status: 'PENDING_LOCK',
                 idempotency_key: idempotencyKey,
                 locked_until: lockedUntil,
+                published_at: new Date(),
                 created_at: new Date(),
                 updated_at: new Date()
             }).returning('*');
+            await trx('reservations_space_lnk').insert({
+                reservation_id: newReservation.id,
+                space_id: spaceId
+            });
 
             return { status: 'created', data: newReservation };
         });
@@ -58,18 +65,18 @@ export default factories.createCoreService('api::reservation.reservation', ({ st
             if (!reservation) throw new Error('RESERVATION_NOT_FOUND');
 
             // Idempotency Check
-            if (reservation.status === 'CONFIRMED') {
+            if (reservation.reservation_status === 'CONFIRMED') {
                 return { status: 'already_confirmed', data: reservation };
             }
             // Expiration Check
-            if (reservation.status === 'PENDING_LOCK' && new Date(reservation.locked_until) < new Date()) {
+            if (reservation.reservation_status === 'PENDING_LOCK' && new Date(reservation.locked_until) < new Date()) {
                 throw new Error("LOCK_EXPIRED");
             }
             // Update state to CONFIRMED
             const [confirmedReservation] = await trx('reservations')
                 .where({ idempotency_key: idempotencyKey })
                 .update({
-                    status: 'CONFIRMED',
+                    reservation_status: 'CONFIRMED',
                     updated_at: new Date()
                 })
                 .returning('*');

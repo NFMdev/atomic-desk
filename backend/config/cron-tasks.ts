@@ -5,10 +5,10 @@ export default {
 
         try {
             const updatedCount = await knex('reservations')
-                .where('status', 'PENDING_LOCK')
+                .where('reservation_status', 'PENDING_LOCK')
                 .andWhere('locked_until', '<', now)
                 .update({
-                    status: 'RELEASED',
+                    reservation_status: 'RELEASED',
                     updated_at: now
                 });
 

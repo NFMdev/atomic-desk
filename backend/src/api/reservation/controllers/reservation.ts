@@ -27,6 +27,7 @@ export default factories.createCoreController('api::reservation.reservation', ({
                 return ctx.notFound("Space does not exist.");
             }
 
+            strapi.log.error('Lock space error', error);
             return ctx.internalServerError("An error occurred processing the reservation.");
         }
     },
