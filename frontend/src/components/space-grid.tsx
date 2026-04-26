@@ -34,13 +34,13 @@ export const SpaceGrid = () => {
                         className={cn(
                             "relative p-6 rounded-xl border-2 transition-all flex flex-col items-center gap-3",
                             "hover:shadow-lg active:scale-95",
-                            space.attributes.type === 'MeetingRoom' ? 'bg-slate-50 border-slate-200' : "bg-white border-blue-50",
+                            space.type === 'MeetingRoom' ? 'bg-slate-50 border-slate-200' : "bg-white border-blue-50",
                             isLocked && "opacity-50 cursor-wait bg-amber-50 border-amber-300"
                         )}
                     >
-                        {space.attributes.type === 'MeetingRoom' ? <Users size={32} /> : <Monitor size={32} />}
-                        <span className="font-bold">{space.attributes.name}</span>
-                        <span className="text-xs text-gray-500 uppercase tracking-widest">{space.attributes.type}</span>
+                        {space.type === 'MeetingRoom' ? <Users size={32} /> : <Monitor size={32} />}
+                        <span className="font-bold">{space.name}</span>
+                        <span className="text-xs text-gray-500 uppercase tracking-widest">{space.type}</span>
 
                         {isLocked && (
                             <div className="absolute top-2 right-2 text-amber-600">

@@ -1,10 +1,8 @@
 export interface Space {
     id: number;
-    attributes: {
-        name: string;
-        type: 'HotDesk' | 'MeetingRoom';
-        status?: 'available' | 'locked' | 'booked';
-    };
+    name: string;
+    type: 'HotDesk' | 'MeetingRoom';
+    status?: 'available' | 'locked' | 'booked';
 }
 
 export interface ReservationLockPayload {
