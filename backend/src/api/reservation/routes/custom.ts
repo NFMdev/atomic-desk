@@ -8,6 +8,12 @@ export default {
         },
         {
             method: 'POST',
+            path: '/reservations/unlock',
+            handler: 'reservation.unlockSpace',
+            config: { auth: false },
+        },
+        {
+            method: 'POST',
             path: '/reservations/confirm',
             handler: 'reservation.confirmPayment',
             config: { auth: false },
