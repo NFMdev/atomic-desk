@@ -1,0 +1,12 @@
+node_modules
+dist
+.tmp
+.cache
+.strapi
+build
+coverage
+logs
+*.log
+.env
+.env.*
+!.env.example
